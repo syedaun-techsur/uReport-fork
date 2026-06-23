@@ -15,8 +15,8 @@ export class GeoRepository {
 
   /**
    * Find nearest geoclusters.id at the given level for (lon, lat).
-   * Uses PostGIS KNN <-> operator with GiST index (TechArch §7.5).
-   * NOTE: ST_MakePoint takes (longitude, latitude) — not (lat, lon).
+   * Uses Euclidean distance on center_lat/center_lng (no PostGIS required).
+   * NOTE: lon maps to center_lng, lat maps to center_lat.
    * Returns null if no geoclusters rows exist at that level.
    */
   async findNearestCluster(level: number, lon: number, lat: number): Promise<number | null> {
@@ -24,7 +24,9 @@ export class GeoRepository {
       SELECT id
       FROM "geoclusters"
       WHERE level = ${level}::smallint
-      ORDER BY center <-> ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)
+        AND center_lat IS NOT NULL
+        AND center_lng IS NOT NULL
+      ORDER BY (center_lat - ${lat}) * (center_lat - ${lat}) + (center_lng - ${lon}) * (center_lng - ${lon})
       LIMIT 1
     `;
     return results.length > 0 ? Number(results[0].id) : null;
@@ -99,7 +101,7 @@ export class GeoRepository {
    * that has at least one visible ticket matching the filters.
    *
    * Role-based category visibility filter applied via displayPermissionLevel (FRD §F02.5).
-   * Uses ST_Y(center) for lat and ST_X(center) for lon — PostGIS geometry accessor functions.
+   * Uses center_lat / center_lng plain Float columns (no PostGIS required).
    */
   async getClusterSummaries(
     zoomLevel: number,
@@ -126,8 +128,8 @@ export class GeoRepository {
       `SELECT
           gc.id,
           gc.level,
-          ST_Y(gc.center) AS lat,
-          ST_X(gc.center) AS lon,
+          gc.center_lat AS lat,
+          gc.center_lng AS lon,
           COUNT(tgd.ticket_id)::text AS count
        FROM "geoclusters" gc
        JOIN "ticket_geodata" tgd ON (
@@ -147,7 +149,7 @@ export class GeoRepository {
          AND cat."displayPermissionLevel" IN (${levelsLiteral})
          ${statusClause}
          ${categoryClause}
-       GROUP BY gc.id, gc.level, gc.center
+       GROUP BY gc.id, gc.level, gc.center_lat, gc.center_lng
        HAVING COUNT(tgd.ticket_id) > 0
        ORDER BY gc.id ASC`,
     );

@@ -322,9 +322,10 @@ model bookmarks {
 }
 
 model geoclusters {
-  id     Int                                 @id @default(autoincrement())
-  level  Int                                 @db.SmallInt
-  center Unsupported("geometry(Point, 4326)")
+  id         Int   @id @default(autoincrement())
+  level      Int   @db.SmallInt
+  center_lat Float?
+  center_lng Float?
 
   ticket_geodata_0 ticket_geodata[] @relation("GeoCluster0")
   ticket_geodata_1 ticket_geodata[] @relation("GeoCluster1")
