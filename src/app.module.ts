@@ -1,30 +1,35 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { GelfLoggerModule } from './common/logger/gelf-logger.module';
 import { GelfRequestMiddleware } from './common/middleware/gelf-request.middleware';
 import { GelfExceptionFilter } from './common/filters/gelf-exception.filter';
 import { FormatMiddleware } from './common/middleware/format.middleware';
+import { AuthMiddleware } from './common/middleware/auth.middleware';
 import { SerializationInterceptor } from './common/interceptors/serialization.interceptor';
 import { JsonSerializer } from './common/serializers/json.serializer';
 import { XmlSerializer } from './common/serializers/xml.serializer';
 import { CsvSerializer } from './common/serializers/csv.serializer';
 import { TxtSerializer } from './common/serializers/txt.serializer';
 import { HtmlRenderer } from './common/serializers/html.renderer';
-import { AdminModule } from './modules/admin/admin.module';
+import { CaslGuard } from './common/guards/casl.guard';
+import { AuthGuard } from './common/guards/auth.guard';
+import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     GelfLoggerModule,
-    AdminModule,
     AuthModule,
-    // Feature modules added here in subsequent waves
+    AdminModule,
+    // Wave 3+ feature modules imported here as they are built
   ],
   providers: [
+    // Serialization
     JsonSerializer,
     XmlSerializer,
     CsvSerializer,
@@ -34,15 +39,23 @@ import { AuthModule } from './modules/auth/auth.module';
       provide: APP_INTERCEPTOR,
       useClass: SerializationInterceptor,
     },
+    // Exception filter (GELF)
     {
       provide: APP_FILTER,
       useClass: GelfExceptionFilter,
     },
+    // RBAC providers — registered here so controllers can inject them via @UseGuards/@UseInterceptors
+    CaslGuard,
+    AuthGuard,
+    PiiMaskInterceptor,
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    // Apply GelfRequestMiddleware first (logging), then FormatMiddleware (content negotiation)
-    consumer.apply(GelfRequestMiddleware, FormatMiddleware).forRoutes('*');
+    // Order matters: FormatMiddleware first, then GELF request logging, then AuthMiddleware
+    // express-session is wired in main.ts (before NestJS middleware pipeline)
+    consumer
+      .apply(FormatMiddleware, GelfRequestMiddleware, AuthMiddleware)
+      .forRoutes('*');
   }
 }
