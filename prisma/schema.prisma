@@ -104,6 +104,7 @@ model people {
   clients                clients[]       @relation("ClientContactPerson")
   categories             categories[]    @relation("CategoryDefaultPerson")
   ticketsEnteredBy       tickets[]       @relation("TicketEnteredBy")
+  ticketsReportedBy      tickets[]       @relation("TicketReportedBy")
   ticketsAssignedTo      tickets[]       @relation("TicketAssignedTo")
   ticketHistoryEnteredBy ticketHistory[] @relation("TicketHistoryEnteredBy")
   ticketHistoryActionOn  ticketHistory[] @relation("TicketHistoryActionPerson")
@@ -263,6 +264,7 @@ model tickets {
   issueType      issueTypes?  @relation(fields: [issueType_id], references: [id])
   client         clients?     @relation(fields: [client_id], references: [id])
   enteredByPerson  people?    @relation("TicketEnteredBy", fields: [enteredByPerson_id], references: [id])
+  reportedByPerson people?    @relation("TicketReportedBy", fields: [reportedByPerson_id], references: [id])
   assignedPerson   people?    @relation("TicketAssignedTo", fields: [assignedPerson_id], references: [id])
   substatus        substatus? @relation(fields: [substatus_id], references: [id])
   ticketHistory    ticketHistory[]
