@@ -13,6 +13,7 @@ import { CsvSerializer } from './common/serializers/csv.serializer';
 import { TxtSerializer } from './common/serializers/txt.serializer';
 import { HtmlRenderer } from './common/serializers/html.renderer';
 import { AdminModule } from './modules/admin/admin.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { AdminModule } from './modules/admin/admin.module';
     PrismaModule,
     GelfLoggerModule,
     AdminModule,
-    // AuthModule added in Task 2
+    AuthModule,
     // Feature modules added here in subsequent waves
   ],
   providers: [
