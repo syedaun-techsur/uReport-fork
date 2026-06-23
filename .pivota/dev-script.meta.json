@@ -1,0 +1,18 @@
+{
+  "generator_version": "init-dev-server@1",
+  "catalog_entry": null,
+  "generated_at": "2026-06-23T20:22:01Z",
+  "inspection_inputs_hash": "6b48b44173b14f4f08b8b6f16ad48b4c104a4b46ffeb98dcc2b07267dbcda6ed",
+  "inspection_inputs": {
+    "matched_globs": [
+      "package.json"
+    ],
+    "manifest_signatures": [
+      "package.json:dep:@nestjs/core@^10.0.0",
+      "package.json:dep:@prisma/client@^5.0.0",
+      "package.json:dev-script:nest start --watch",
+      "package.json:start-script:node dist/main"
+    ],
+    "existing_scripts": []
+  }
+}
