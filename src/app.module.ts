@@ -19,6 +19,7 @@ import { PeopleModule } from './modules/people/people.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
+import { MediaModule } from './modules/media/media.module';  // ← Wave 5c
 import { CaslGuard } from './common/guards/casl.guard';
 import { AuthGuard } from './common/guards/auth.guard';
 import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
@@ -34,8 +35,9 @@ import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
     CategoriesModule,
     DepartmentsModule,
     TicketsModule,
+    MediaModule,   // ← Wave 5c
     // Wave 4b: Open311Module (plan 10) added here
-    // Wave 5+: SearchModule, NotificationsModule, MediaModule, GeoModule
+    // Wave 5+: SearchModule, NotificationsModule, GeoModule
   ],
   providers: [
     // Serialization
