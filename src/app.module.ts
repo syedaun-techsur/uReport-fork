@@ -19,7 +19,6 @@ import { PeopleModule } from './modules/people/people.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
-import { Open311Module } from './modules/open311/open311.module';
 import { CaslGuard } from './common/guards/casl.guard';
 import { AuthGuard } from './common/guards/auth.guard';
 import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
@@ -34,10 +33,9 @@ import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
     PeopleModule,
     CategoriesModule,
     DepartmentsModule,
-    TicketsModule,     // Wave 4b: ticket lifecycle (plans 09/10)
-    Open311Module,     // Wave 4c: GeoReport v2 Open311 API (plan 11)
-    // Wave 5: SearchModule, NotificationsModule, MediaModule, GeoModule
-    // Wave 6: BookmarksModule, ReportsModule
+    TicketsModule,
+    // Wave 4b: Open311Module (plan 10) added here
+    // Wave 5+: SearchModule, NotificationsModule, MediaModule, GeoModule
   ],
   providers: [
     // Serialization
