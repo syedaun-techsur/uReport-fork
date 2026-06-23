@@ -15,6 +15,9 @@ import { TxtSerializer } from './common/serializers/txt.serializer';
 import { HtmlRenderer } from './common/serializers/html.renderer';
 import { AuthModule } from './modules/auth/auth.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { PeopleModule } from './modules/people/people.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { DepartmentsModule } from './modules/departments/departments.module';
 import { CaslGuard } from './common/guards/casl.guard';
 import { AuthGuard } from './common/guards/auth.guard';
 import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
@@ -26,7 +29,10 @@ import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
     GelfLoggerModule,
     AuthModule,
     AdminModule,
-    // Wave 3+ feature modules imported here as they are built
+    PeopleModule,
+    CategoriesModule,
+    DepartmentsModule,
+    // Wave 4+ modules imported here as built
   ],
   providers: [
     // Serialization
