@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   Optional,
   NotFoundException,
   ForbiddenException,
@@ -12,6 +13,7 @@ import { PeopleService } from '../people/people.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import type { NotificationAction } from '../notifications/notifications.types';
 import { GeoClusterService } from '../geo/geo.service';
+import { SolrService } from '../search/solr.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { AssignTicketDto } from './dto/assign-ticket.dto';
@@ -47,12 +49,54 @@ function roleDescriptor(user: { id: number; role: string | null } | null): { rol
 
 @Injectable()
 export class TicketsService {
+  private readonly logger = new Logger(TicketsService.name);
+
   constructor(
     private readonly repo: TicketsRepository,
     private readonly categoriesService: CategoriesService,
     private readonly peopleService: PeopleService,
     private readonly notificationsService: NotificationsService,
+    @Optional() private readonly geoClusterService?: GeoClusterService,
+    @Optional() private readonly solrService?: SolrService,
   ) {}
+
+  // =========================================================
+  // Private geo helpers (fire-and-forget pattern — FRD §F09.4)
+  // =========================================================
+
+  /**
+   * Fire-and-forget geo cluster assignment.
+   * Geo failure must NOT fail the ticket operation (FRD §F09.4).
+   */
+  private fireAndForgetAssign(ticketId: number, lat: number | null | undefined, lon: number | null | undefined): void {
+    if (!this.geoClusterService || lat == null || lon == null) return;
+    this.geoClusterService.assignClusters(ticketId, lat, lon).catch((err: Error) => {
+      console.error(`[GeoCluster] assignClusters failed for ticket ${ticketId}:`, err?.message);
+    });
+  }
+
+  /**
+   * Fire-and-forget geo data deletion when lat/lon cleared to null.
+   * Geo failure must NOT fail the ticket operation (FRD §F09.4).
+   */
+  private fireAndForgetDelete(ticketId: number): void {
+    if (!this.geoClusterService) return;
+    this.geoClusterService.deleteGeodata(ticketId).catch((err: Error) => {
+      console.error(`[GeoCluster] deleteGeodata failed for ticket ${ticketId}:`, err?.message);
+    });
+  }
+
+  /**
+   * Fire-and-forget Solr indexing helper (FRD §F05.4).
+   * Solr failure MUST NOT propagate to the ticket HTTP response.
+   */
+  private indexTicketAsync(ticketId: number): void {
+    if (!this.solrService) return;
+    this.solrService.indexTicket(ticketId).catch((err: Error) => {
+      // GELF warn: Solr indexing failure must NOT propagate (FRD §F05.4)
+      this.logger.warn(`Solr indexing failed for ticket ${ticketId}: ${err.message}`);
+    });
+  }
 
   // =========================================================
   // Internal helpers
@@ -209,6 +253,12 @@ export class TicketsService {
       void this.notificationsService.send('open', ticket.id, user?.id ?? null, openHistory.id);
     }
 
+    // FRD §F09.4 — assign geo-clusters if lat/lon provided (fire-and-forget)
+    this.fireAndForgetAssign(ticket.id, dto.latitude, dto.longitude);
+
+    // FRD §F05.4: fire-and-forget Solr indexing; failure MUST NOT fail the ticket write
+    this.indexTicketAsync(ticket.id);
+
     return ticket;
   }
 
@@ -282,8 +332,23 @@ export class TicketsService {
       } as any);
     }
 
-    // HOOK: wave 5 — SolrService.indexTicket(ticketId) — fire-and-forget
-    // HOOK: wave 5 — if lat/lon changed: GeoClusterService.assignClusters(ticketId, lat, lon)
+    // FRD §F05.4: fire-and-forget Solr indexing after update
+    this.indexTicketAsync(ticket.id);
+
+    // FRD §F09.4 — geo re-cluster on lat/lon change
+    const latChanged = dto.latitude !== undefined && dto.latitude !== existing.latitude;
+    const lonChanged = dto.longitude !== undefined && dto.longitude !== existing.longitude;
+    const latCleared = dto.latitude === null;
+    const lonCleared = dto.longitude === null;
+
+    if (latCleared && lonCleared) {
+      // lat/lon explicitly cleared → delete ticket_geodata row
+      this.fireAndForgetDelete(ticket.id);
+    } else if (latChanged || lonChanged) {
+      const newLat = dto.latitude ?? existing.latitude;
+      const newLon = dto.longitude ?? existing.longitude;
+      this.fireAndForgetAssign(ticket.id, newLat, newLon);
+    }
 
     return ticket;
   }
@@ -388,6 +453,9 @@ export class TicketsService {
       closedDate: now,
       lastModified: now,
     } as any);
+
+    // FRD §F05.4: fire-and-forget Solr indexing after close
+    this.indexTicketAsync(updated.id);
 
     // F7: fire notification after 'closed' history is written (FRD §F07.1)
     void this.notificationsService.send('closed', ticketId, userId, closedHistory.id);
@@ -619,7 +687,8 @@ export class TicketsService {
       lastModified: now,
     } as any);
 
-    // HOOK: wave 5 — SolrService.indexTicket(ticketId)
+    // FRD §F05.4: fire-and-forget Solr indexing after reopen
+    this.indexTicketAsync(updated.id);
 
     return updated;
   }

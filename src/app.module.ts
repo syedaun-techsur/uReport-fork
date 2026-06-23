@@ -25,6 +25,7 @@ import { Open311Module } from './modules/open311/open311.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
 import { SearchModule } from './modules/search/search.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { GeoModule } from './modules/geo/geo.module';
 
 @Module({
   imports: [
@@ -40,7 +41,8 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     Open311Module,          // Wave 4c: GeoReport v2 public API
     NotificationsModule,    // Wave 5 plan 13: F7 email notifications (Nodemailer, digest cron)
     SearchModule,           // Wave 5 plan 12: F5 Solr full-text search
-    // Wave 5: MediaModule, GeoModule
+    GeoModule,              // Wave 5 plan 15: F9 geo-clustering of ticket locations
+    // Wave 5: MediaModule
     // Wave 6: BookmarksModule, ReportsModule
   ],
   providers: [
