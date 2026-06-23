@@ -37,22 +37,25 @@ echo "[pivota] $(date -Iseconds) start-dev.sh begin (catalog: agent/nestjs)"
 
 # === ENV preamble: NestJS binds to 0.0.0.0 via app.listen(port, '0.0.0.0') in main.ts ===
 export PORT="${PORT:-3000}"
-export NODE_ENV="${NODE_ENV:-production}"
+# NODE_ENV must NOT default to 'production': `npm ci`/`npm install` omit
+# devDependencies under production, and the build toolchain (@nestjs/cli's `nest`,
+# typescript, prisma) lives in devDependencies. Stripping them makes `npm run build`
+# (`nest build`) fail with "nest: not found" and the dev server never starts.
+export NODE_ENV="${NODE_ENV:-development}"
+# DATABASE_URL is injected by the platform DB sidecar (Postgres on localhost:5432);
+# the value below is only a last-resort fallback. We deliberately do NOT copy
+# .env.example -> .env: that file ships a placeholder postgresql:// URL pointing at
+# a non-existent host, which would shadow the injected DATABASE_URL for the Prisma
+# CLI and break `prisma db push` / boot-time `$connect()`.
 export DATABASE_URL="${DATABASE_URL:-postgres://postgres:devpass@localhost:5432/app}"
 export REDIS_URL="${REDIS_URL:-redis://localhost:6379}"
 export SESSION_SECRET="${SESSION_SECRET:-dev-secret-change-in-prod}"
-
-# === D-11.3: .env.example -> .env transitional copy (until Phase 38) ===
-if [[ ! -f .env && -f .env.example ]]; then
-  echo "[pivota] copying .env.example -> .env (Phase 38 will replace this hack)"
-  cp .env.example .env
-fi
 
 # === D-12: idempotent install via lockfile hash + presence check ===
 SENTINEL="/tmp/pivota-setup-sentinel"
 LOCK_FILE_PATH="package-lock.json"
 INSTALL_PRESENCE_CHECK="node_modules/.package-lock.json"
-INSTALL_CMD='npm ci --prefer-offline 2>/dev/null || npm install'
+INSTALL_CMD='npm ci --include=dev --prefer-offline 2>/dev/null || npm install --include=dev'
 
 run_install() {
   echo "[pivota] running install: $INSTALL_CMD"
@@ -86,15 +89,28 @@ elif [[ -n "$INSTALL_CMD" ]]; then
   fi
 fi
 
-# === Pre-exec: build NestJS and run Prisma migrations ===
-echo "[pivota] running prisma migrate deploy..."
-npx prisma migrate deploy 2>/dev/null || npx prisma db push --accept-data-loss 2>/dev/null || echo "[pivota] prisma migrate skipped (no migrations dir?)"
+# === Pre-exec: generate Prisma client, sync schema to the injected DB, build ===
+# Generate the client first — `nest build` and runtime both need @prisma/client
+# generated against the schema.
+echo "[pivota] prisma generate..."
+npx prisma generate 2>&1 | tail -2 || echo "[pivota] prisma generate skipped"
+
+# This project ships no prisma/migrations dir, so `migrate deploy` is a no-op;
+# `db push` materializes the schema in the fresh preview DB. Non-fatal: if the DB
+# is unreachable the server still boots and serves (DB-backed routes degrade), so
+# the preview is never left as an infinite "waiting for the dev server" spinner.
+if [[ -n "${DATABASE_URL:-}" ]]; then
+  echo "[pivota] prisma db push (sync schema to injected DB)..."
+  npx prisma db push --skip-generate --accept-data-loss || echo "[pivota] prisma db push non-zero (continuing)"
+fi
 
 echo "[pivota] building NestJS app..."
 npm run build
 
 # === D-14: retry loop (3 attempts, exponential backoff 1s / 2s / 4s) ===
-EXEC_CMD='node dist/main'
+# NestJS builds with sourceRoot=src, so the entrypoint is dist/src/main.js
+# (matches package.json "start"). The old `node dist/main` path does not exist.
+EXEC_CMD='node dist/src/main'
 ATTEMPT=1
 DELAY=1
 while (( ATTEMPT <= 3 )); do
