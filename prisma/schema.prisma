@@ -101,7 +101,7 @@ model people {
   peopleEmails           peopleEmails[]
   peoplePhones           peoplePhones[]
   peopleAddresses        peopleAddresses[]
-  clients                clients[]
+  clients                clients[]       @relation("ClientContactPerson")
   categories             categories[]    @relation("CategoryDefaultPerson")
   ticketsEnteredBy       tickets[]       @relation("TicketEnteredBy")
   ticketsAssignedTo      tickets[]       @relation("TicketAssignedTo")
@@ -157,12 +157,14 @@ model clients {
   api_key          String  @unique @db.VarChar(50)
   contactPerson_id Int     @map("contactPerson_id")
   contactMethod_id Int?    @map("contactMethod_id")
+  active           Boolean @default(true)
 
-  contactPerson people          @relation(fields: [contactPerson_id], references: [id])
+  contactPerson people          @relation("ClientContactPerson", fields: [contactPerson_id], references: [id])
   contactMethod contactMethods? @relation(fields: [contactMethod_id], references: [id])
   tickets       tickets[]
 
   @@map("clients")
+  @@index([api_key], map: "idx_clients_api_key")
 }
 
 model categories {
