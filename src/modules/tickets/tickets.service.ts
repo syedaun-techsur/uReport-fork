@@ -8,6 +8,8 @@ import {
 import { TicketsRepository, permissionLevels } from './tickets.repository';
 import { CategoriesService } from '../categories/categories.service';
 import { PeopleService } from '../people/people.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import type { NotificationAction } from '../notifications/notifications.types';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { AssignTicketDto } from './dto/assign-ticket.dto';
@@ -47,6 +49,7 @@ export class TicketsService {
     private readonly repo: TicketsRepository,
     private readonly categoriesService: CategoriesService,
     private readonly peopleService: PeopleService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // =========================================================
@@ -193,13 +196,15 @@ export class TicketsService {
 
     const openAction = await this.repo.findActionByName('open');
     if (openAction) {
-      await this.repo.appendHistory({
+      const openHistory = await this.repo.appendHistory({
         ticket: { connect: { id: ticket.id } },
         action: { connect: { id: openAction.id } },
         enteredByPerson: user ? { connect: { id: user.id } } : undefined,
         enteredDate: now,
         actionDate: now,
       } as any);
+      // F7: fire notification after 'open' history is written (FRD §F07.1)
+      void this.notificationsService.send('open', ticket.id, user?.id ?? null, openHistory.id);
     }
 
     return ticket;
@@ -312,7 +317,7 @@ export class TicketsService {
 
     const action = await this.repo.findActionByName('assignment');
     if (action) {
-      await this.repo.appendHistory({
+      const assignHistory = await this.repo.appendHistory({
         ticket: { connect: { id } },
         action: { connect: { id: action.id } },
         enteredByPerson: { connect: { id: user.id } },
@@ -320,6 +325,8 @@ export class TicketsService {
         enteredDate: now,
         actionDate: now,
       } as any);
+      // F7: fire notification after 'assignment' history is written (FRD §F07.1)
+      void this.notificationsService.send('assignment' as NotificationAction, id, user.id, assignHistory.id);
     }
 
     return updated;
@@ -362,7 +369,7 @@ export class TicketsService {
     const action = await this.resolveAction('closed');
     const now = new Date();
 
-    await this.repo.appendHistory({
+    const closedHistory = await this.repo.appendHistory({
       ticket: { connect: { id: ticketId } },
       action: { connect: { id: action.id } },
       enteredByPerson: { connect: { id: userId } },
@@ -380,8 +387,8 @@ export class TicketsService {
       lastModified: now,
     } as any);
 
-    // HOOK: wave 5 — SolrService.indexTicket(ticketId)
-    // HOOK: wave 5 — NotificationsService.send('closed', ticket, actorId)
+    // F7: fire notification after 'closed' history is written (FRD §F07.1)
+    void this.notificationsService.send('closed', ticketId, userId, closedHistory.id);
 
     return updated;
   }
@@ -452,7 +459,7 @@ export class TicketsService {
     // Append 'duplicate' action to PARENT ticketHistory only (FRD §F01.5)
     const duplicateAction = await this.repo.findActionByName('duplicate');
     if (duplicateAction) {
-      await this.repo.appendHistory({
+      const dupHistory = await this.repo.appendHistory({
         ticket: { connect: { id: dto.parent_id } },
         action: { connect: { id: duplicateAction.id } },
         enteredByPerson: { connect: { id: userId } },
@@ -462,12 +469,12 @@ export class TicketsService {
         data: JSON.stringify({ duplicate: ticketId }),
         sentNotifications: null,
       } as any);
+      // F7: fire notification for 'duplicate' on child ticket reporter (FRD §F07.1)
+      void this.notificationsService.send('duplicate', ticketId, userId, dupHistory.id);
     }
 
     // Update parent lastModified
     await this.repo.update(dto.parent_id, { lastModified: now });
-
-    // HOOK: wave 5 — NotificationsService.send('duplicate', child, actorId)
 
     return this.repo.findOne(ticketId);
   }
@@ -492,7 +499,7 @@ export class TicketsService {
     const action = await this.resolveAction('comment');
     const now = new Date();
 
-    const history = await this.repo.appendHistory({
+    const commentHistory = await this.repo.appendHistory({
       ticket: { connect: { id: ticketId } },
       action: { connect: { id: action.id } },
       enteredByPerson: { connect: { id: actorId } },
@@ -505,7 +512,10 @@ export class TicketsService {
 
     await this.repo.update(ticketId, { lastModified: now });
 
-    return history;
+    // F7: fire notification after 'comment' history is written (FRD §F07.1)
+    void this.notificationsService.send('comment', ticketId, actorId, commentHistory.id);
+
+    return commentHistory;
   }
 
   /** Plan 09 alias for addComment */
@@ -546,13 +556,14 @@ export class TicketsService {
       historyData.actionPerson = { connect: { id: resolvedActionPersonId } };
     }
 
-    const history = await this.repo.appendHistory(historyData as Prisma.ticketHistoryCreateInput);
+    const responseHistory = await this.repo.appendHistory(historyData as Prisma.ticketHistoryCreateInput);
 
     await this.repo.update(ticketId, { lastModified: now });
 
-    // HOOK: wave 5 — NotificationsService.send('response', ticket, actorId)
+    // F7: fire notification after 'response' history is written (FRD §F07.1)
+    void this.notificationsService.send('response', ticketId, actorId, responseHistory.id);
 
-    return history;
+    return responseHistory;
   }
 
   /** Plan 09 alias for addResponse */

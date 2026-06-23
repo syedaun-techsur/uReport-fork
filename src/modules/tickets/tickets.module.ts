@@ -4,9 +4,12 @@ import { TicketsService } from './tickets.service';
 import { TicketsRepository } from './tickets.repository';
 import { CategoriesModule } from '../categories/categories.module';
 import { PeopleModule } from '../people/people.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { SearchModule } from '../search/search.module';
+import { GeoModule } from '../geo/geo.module';
 
 @Module({
-  imports: [CategoriesModule, PeopleModule],
+  imports: [CategoriesModule, PeopleModule, NotificationsModule, SearchModule, GeoModule],
   controllers: [TicketsController],
   providers: [TicketsService, TicketsRepository],
   /**
