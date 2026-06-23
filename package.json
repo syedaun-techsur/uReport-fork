@@ -1,7 +1,7 @@
 {
   "name": "ureport",
   "version": "1.0.0",
-  "description": "uReport \u2014 Open311 GeoReport v2 constituent-request CRM (Node.js re-platform)",
+  "description": "uReport — Open311 GeoReport v2 constituent-request CRM (Node.js re-platform)",
   "private": true,
   "scripts": {
     "build": "nest build",
@@ -48,6 +48,7 @@
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
+    "@playwright/test": "^1.61.1",
     "@types/connect-redis": "^0.0.23",
     "@types/express": "^4.17.21",
     "@types/express-session": "^1.17.10",

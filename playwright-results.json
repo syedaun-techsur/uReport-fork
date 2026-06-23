@@ -1,0 +1,1069 @@
+{
+  "config": {
+    "argv": [
+      "/usr/bin/node",
+      "/home/daytona/project/node_modules/.bin/playwright",
+      "test",
+      "e2e/uat/modernize-legacy-php-ureport-open311-geo.spec.ts"
+    ],
+    "configFile": "/home/daytona/project/playwright.config.ts",
+    "rootDir": "/home/daytona/project/e2e/uat",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/daytona/project/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/daytona/project/e2e/uat",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json",
+        {
+          "outputFile": "playwright-results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.61.1",
+    "workers": 8,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+      "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "US-0.1 — Browse Available Service Categories",
+          "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+          "line": 31,
+          "column": 6,
+          "specs": [
+            {
+              "title": "GET /open311/v2/services returns HTTP 200 with JSON array",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 315,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.569Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-964625d962a453516d83",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "Each service object contains required Open311 fields",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.910Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-70070a6fb06fdbb4a7d4",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 39,
+              "column": 7
+            },
+            {
+              "title": "jurisdiction_id query param is accepted and silently ignored",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.922Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-2d2afbe68560452b4d2f",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 54,
+              "column": 7
+            },
+            {
+              "title": "Content negotiation: XML returned on Accept: application/xml",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.930Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-6714e0df2bf37e026deb",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 61,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "US-0.2 — Retrieve Single Service Definition",
+          "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+          "line": 76,
+          "column": 6,
+          "specs": [
+            {
+              "title": "GET /open311/v2/services/:id returns ServiceDefinition with attributes array",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.939Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-645790e1bf585e1c3af8",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 77,
+              "column": 7
+            },
+            {
+              "title": "GET /open311/v2/services/:id returns 404 for non-existent service",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.945Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-bf93b21f445f342062e3",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 88,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "US-0.3 — Submit a Service Request via Open311 API",
+          "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+          "line": 97,
+          "column": 6,
+          "specs": [
+            {
+              "title": "POST /open311/v2/requests returns 403 for missing api_key",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.952Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-f44333a858157711eb7b",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 98,
+              "column": 7
+            },
+            {
+              "title": "POST /open311/v2/requests returns 403 for invalid api_key",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.957Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-ac8fe421989161f47761",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 105,
+              "column": 7
+            },
+            {
+              "title": "POST /open311/v2/requests returns 400 when neither lat/long nor address provided",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.963Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-6deba50fc2b3e7396569",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 112,
+              "column": 7
+            },
+            {
+              "title": "POST /open311/v2/requests returns 400 for lat out of range",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.968Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-fb2a918d367230295518",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 119,
+              "column": 7
+            },
+            {
+              "title": "POST /open311/v2/requests returns 404 for invalid service_code",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.974Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-c324d7bdfa48936317c7",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 126,
+              "column": 7
+            },
+            {
+              "title": "POST /open311/v2/requests succeeds and returns service_request_id + token",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.981Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-78e7c00c3741fbf54ee2",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 133,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "US-0.4 — Query Service Requests with Filters",
+          "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+          "line": 159,
+          "column": 6,
+          "specs": [
+            {
+              "title": "GET /open311/v2/requests returns HTTP 200 with array",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.990Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-3959a9b87b0ba9cba43d",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 160,
+              "column": 7
+            },
+            {
+              "title": "GET /open311/v2/requests?status=open filters to open tickets",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:37.997Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-114ea4c94e4aca6fe7f8",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 167,
+              "column": 7
+            },
+            {
+              "title": "GET /open311/v2/requests?status=invalid returns 400",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.006Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-36995c5af8ae93b923c5",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 178,
+              "column": 7
+            },
+            {
+              "title": "Each result includes required Open311 fields",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.011Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-bd010b419bf8490a8946",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 183,
+              "column": 7
+            },
+            {
+              "title": "GET /open311/v2/requests with service_code filter",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.019Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-2e022ee81900b5e019b7",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 199,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "US-0.5 — Retrieve a Single Service Request by ID",
+          "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+          "line": 210,
+          "column": 6,
+          "specs": [
+            {
+              "title": "GET /open311/v2/requests/:id returns single-element array with ServiceRequest",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.026Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-429e12c359febec2bc5b",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 233,
+              "column": 7
+            },
+            {
+              "title": "GET /open311/v2/requests/:id returns 404 for non-existent ID",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.039Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-71fc3df9178a60b4822d",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 243,
+              "column": 7
+            },
+            {
+              "title": "GET /open311/v2/tokens/:token returns token + service_request_id",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.044Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-50a163b14c1b298d47b5",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 249,
+              "column": 7
+            },
+            {
+              "title": "GET /open311/v2/tokens/:token returns 404 for non-existent token",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.050Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-b5176b0ead7f4890ca37",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 261,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "US-0.6 — Token Lookup",
+          "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+          "line": 270,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Token lookup does not require authentication (anonymous access)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.055Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-0fd143e4ce6f8b091522",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 271,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "US-1.1 — Submit Service Request Field Validation",
+          "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+          "line": 299,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Submission to anonymous postingPermissionLevel succeeds without session",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.063Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-2b1d0122e14c359b191a",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 300,
+              "column": 7
+            },
+            {
+              "title": "Long out of range returns 400",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.070Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-e56f2f09ab67d3be56ad",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 316,
+              "column": 7
+            },
+            {
+              "title": "Created ticket has status=open",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.075Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-51f333a8acb83bc2bb37",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 328,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Epic 3 — Content Negotiation",
+          "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+          "line": 353,
+          "column": 6,
+          "specs": [
+            {
+              "title": "GET /open311/v2/requests returns XML with Accept: application/xml",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.084Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-e1290d33100be52b7806",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 354,
+              "column": 7
+            },
+            {
+              "title": "GET /open311/v2/services returns JSON by default (no Accept header)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-06-23T20:31:38.090Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f404fab74becbbec3091-ce4c0df67d36d849d5c7",
+              "file": "modernize-legacy-php-ureport-open311-geo.spec.ts",
+              "line": 363,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-06-23T20:31:37.357Z",
+    "duration": 751.314,
+    "expected": 27,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
