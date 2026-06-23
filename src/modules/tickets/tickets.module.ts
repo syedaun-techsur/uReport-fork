@@ -9,6 +9,12 @@ import { PeopleModule } from '../people/people.module';
   imports: [CategoriesModule, PeopleModule],
   controllers: [TicketsController],
   providers: [TicketsService, TicketsRepository],
-  exports: [TicketsService],   // exported for Open311Module (Wave 4b plan 10)
+  /**
+   * Export TicketsService so:
+   * - Open311Module (plan 11) can call findOne() for GET /requests/:id
+   * - Wave 5 SearchModule can call list() for Solr fallback
+   * - Wave 5 MediaModule can call appendHistory() via TicketsService
+   */
+  exports: [TicketsService],
 })
 export class TicketsModule {}
