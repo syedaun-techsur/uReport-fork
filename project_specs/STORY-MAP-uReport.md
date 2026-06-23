@@ -10,7 +10,7 @@
 | **Related JTBD** | `project_specs/JTBD-uReport.md` |
 | **Related Journeys** | `project_specs/JOURNEYS-uReport.md` |
 | **Related UserStories** | `project_specs/UserStories-uReport.md` |
-| **Total Stories Mapped** | 79 |
+| **Total Stories Mapped** | 80 |
 | **Status** | Active |
 
 ---
@@ -77,6 +77,7 @@ Story map entries are referenced as `SM-{Epic}.{Story}` (e.g., `SM-0.1` = US-0.1
 | SM-9.1 | **US-9.1** View Geo-Clustered Ticket Map | Query Nearby | Epic 9 (F9) | JTBD-01.3: "Geo-cluster map view surfaces nearby reports visually" → `GET /locations` returns cluster objects filtered by caller's role; anonymous user can confirm whether an issue near their address is already reported | R2 |
 | SM-9.2 | **US-9.2** Ticket Receives Geo-Cluster Assignment on Creation | Submit Request | Epic 9 (F9) | JTBD-01.1: "Accepts location input (GPS coordinates) from a mobile browser" → On ticket creation with lat/lon, `ticket_geodata` row is upserted for all 7 cluster levels so ticket appears on map immediately | R2 |
 | SM-3.5 | **US-3.5** View HTML Responses in Browser | Discover Services | Epic 3 (F3) | JTBD-01.1: "Form renders correctly on a mobile browser without a native app" → Browser requests receive full HTML with header/nav/footer; mobile-compatible layout matches existing PHP interface structure | R1 |
+| SM-3.6 | **US-3.6** Request Plain Text (TXT) Response | Submit Request | Epic 3 (F3) | JTBD-01.1: "Open311 response byte-compatible with PHP implementation (NFR-1)" → `.txt` suffix or `Accept: text/plain` returns tab-delimited plain text with no header row; field order and byte output identical to legacy PHP for same input fixture | R1 |
 
 ---
 ---
@@ -221,6 +222,7 @@ Full traceability chain: `JTBD Outcome → Journey Stage → NaC Statement → S
 | JTBD-01.1 | First-time user completes submission in ≤ 3 minutes | JRN-01.1: Submit | Web form creates ticket from `category_id` + location with no login; `action='open'` logged; confirmation includes ticket ID | US-1.1 |
 | JTBD-01.1 | Response byte-compatible with PHP implementation (NFR-1) | JRN-01.2: Submit Request | `POST /open311/v2/requests` JSON response byte-identical to legacy PHP for same input fixture | US-3.1 |
 | JTBD-01.1 | Response byte-compatible with PHP implementation (NFR-1) | JRN-01.2: Discover Services | `.xml` suffix returns XML with CDATA wrapping identical to legacy for the same input fixture | US-3.2 |
+| JTBD-01.1 | Response byte-compatible with PHP implementation (NFR-1) | JRN-01.2: Submit Request | `.txt` suffix or `Accept: text/plain` returns tab-delimited plain text with no header row; byte-compatible with legacy PHP for same input fixture | US-3.6 |
 | JTBD-01.1 | Format negotiated correctly for external API clients | JRN-01.2: Submit Request | URL suffix > query param > Accept header priority order consistent across all requests | US-3.4 |
 | JTBD-01.1 | Form renders correctly on a mobile browser | JRN-01.2: Discover Services | Browser requests receive full HTML with header/nav/footer; mobile-compatible layout matches existing PHP interface | US-3.5 |
 | JTBD-01.2 | Token lookup returns ticket status in ≤ 200ms without authentication | JRN-01.2: Poll for Status | `GET /open311/v2/tokens/:token` returns `{token, service_request_id}` in ≤ 200ms; no auth required; HTTP 404 if token not found | US-0.6 |
@@ -323,7 +325,7 @@ Full traceability chain: `JTBD Outcome → Journey Stage → NaC Statement → S
 | JTBD-04.2 | ❌ Deferred to R3 |
 | JTBD-04.3 | ❌ Deferred to R2 |
 
-**R1 Stories (31 stories — all P0):**
+**R1 Stories (32 stories — all P0):**
 
 | SM-ID | Story | Epic |
 |---|---|---|
@@ -353,6 +355,7 @@ Full traceability chain: `JTBD Outcome → Journey Stage → NaC Statement → S
 | SM-3.3 | US-3.3 Export Ticket List to CSV | F3 |
 | SM-3.4 | US-3.4 Format Resolution Priority is Consistent | F3 |
 | SM-3.5 | US-3.5 View HTML Responses in Browser | F3 |
+| SM-3.6 | US-3.6 Request Plain Text (TXT) Response | F3 |
 | SM-4.1 | US-4.1 Log In via OIDC | F4 |
 | SM-4.2 | US-4.2 OIDC Callback and User Provisioning | F4 |
 | SM-4.3 | US-4.3 Session Persistence Across Page Loads | F4 |

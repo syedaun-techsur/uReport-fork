@@ -239,7 +239,7 @@ Tickets are the core entity of uReport. The full lifecycle — creation, assignm
 - [ ] Staff-only action; returns HTTP 403 for non-staff callers
 - [ ] `parent_id` must reference a different, existing ticket; self-reference returns HTTP 400
 - [ ] Child ticket's `parent_id` is set and child is closed with sub-status `Duplicate`
-- [ ] A `duplicate` action is appended to the **parent** ticket's `ticketHistory` with `data = {duplicate: child_ticket_id}`
+- [ ] A `duplicate` action is appended to the **parent** ticket's `ticketHistory` only, with `data = {duplicate: child_ticket_id}`; the child ticket's record of the event is its closure entry with `substatus = Duplicate`
 - [ ] `duplicate` email notification is triggered to the child ticket's reporter (F7)
 - [ ] Attempting to set `parent_id` on a ticket that already has one returns HTTP 400
 
@@ -464,6 +464,22 @@ Every endpoint in uReport supports five response formats (HTML, JSON, XML, CSV, 
 - [ ] Template variables match the controller data shape
 - [ ] HTML output preserves the existing PHP view hierarchy structure
 - [ ] HTML is generated via a server-side template engine (Handlebars or Nunjucks)
+
+**Priority:** P0 | **Feature Ref:** F3
+
+---
+
+### US-3.6: Request Plain Text (TXT) Response via Accept Header or URL Suffix
+**As an** Anonymous Citizen (API client), **I want** the API to return plain text when I request it via the `Accept: text/plain` header or `.txt` URL suffix, **so that** text-based feed consumers and legacy integrations that rely on the TXT format continue to work without modification.
+
+**Acceptance Criteria:**
+- [ ] A request with `Accept: text/plain` returns `Content-Type: text/plain; charset=utf-8`
+- [ ] A request to a URL ending in `.txt` returns TXT regardless of the `Accept` header
+- [ ] TXT output contains one record per line with fields separated by a tab character (`\t`)
+- [ ] No header row is included
+- [ ] Field order matches the legacy PHP TXT output exactly for each endpoint
+- [ ] TXT output is byte-compatible with legacy PHP output for identical input fixtures
+- [ ] Error responses in TXT format return a plain text message with the HTTP status code
 
 **Priority:** P0 | **Feature Ref:** F3
 
@@ -1083,8 +1099,10 @@ Staff manage person records, contact details (emails, phones, addresses), API cl
 **Acceptance Criteria:**
 - [ ] `api_key` must be unique (max 50 chars); duplicate returns HTTP 409
 - [ ] `contactPerson_id` must reference an existing person; missing person returns HTTP 404
-- [ ] Clients referenced by tickets (`tickets.client_id`) cannot be deleted; returns HTTP 409
+- [ ] Clients referenced by tickets (`tickets.client_id`) cannot be hard-deleted; returns HTTP 409
+- [ ] **Revocation:** Setting `active = false` on a client record deactivates the API key immediately; the next `POST /open311/v2/requests` with that key returns HTTP 403 (no application restart required)
 - [ ] A new API key can be created and immediately used without a system restart
+- [ ] `active` defaults to `true` on client creation
 - [ ] Staff-only access; returns HTTP 403 for non-staff
 
 **Priority:** P1 | **Feature Ref:** F11
@@ -1322,6 +1340,7 @@ Summary table of all user stories by ID, persona, priority, and feature referenc
 | US-3.3 | Export Ticket List to CSV | Case Worker | P0 | F3 |
 | US-3.4 | Format Resolution Priority is Consistent | Department Supervisor | P0 | F3 |
 | US-3.5 | View HTML Responses in Browser | Authenticated Resident | P0 | F3 |
+| US-3.6 | Request Plain Text (TXT) Response | Anonymous Citizen | P0 | F3 |
 | US-4.1 | Log In via OIDC Authorization Code Flow | Authenticated Resident | P0 | F4 |
 | US-4.2 | Complete OIDC Callback and User Provisioning | Authenticated Resident | P0 | F4 |
 | US-4.3 | Session Persistence Across Page Loads | Authenticated Resident | P0 | F4 |
@@ -1377,7 +1396,7 @@ Summary table of all user stories by ID, persona, priority, and feature referenc
 | US-15.3 | Manage Issue Types | Department Supervisor | P2 | F15 |
 | US-15.4 | Manage Contact Methods | Department Supervisor | P2 | F15 |
 
-**Total stories: 79**
+**Total stories: 80**
 
 ---
 ## Priority Breakdown
@@ -1388,7 +1407,7 @@ These stories represent the minimum viable re-platform. The system cannot go liv
 
 | Count | Epics |
 |---|---|
-| 31 stories | F0 (Open311 API), F1 (Ticket Lifecycle), F2 (RBAC), F3 (Content Negotiation), F4 (OIDC Auth), F6 (Schema Migration) |
+| 32 stories | F0 (Open311 API), F1 (Ticket Lifecycle), F2 (RBAC), F3 (Content Negotiation), F4 (OIDC Auth), F6 (Schema Migration) |
 
 **Key constraints:**
 - Open311 GeoReport v2 response bodies must be byte-compatible with the legacy PHP implementation

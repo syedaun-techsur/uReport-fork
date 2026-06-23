@@ -273,7 +273,7 @@ The re-platform must resolve all of these pain points without changing any exter
 - **People Emails:** `peopleEmails` — multiple email addresses per person with label and `usedForNotifications` flag
 - **People Phones:** `peoplePhones` — multiple phone numbers per person with label
 - **People Addresses:** `peopleAddresses` — multiple addresses per person with label
-- **Clients (API keys):** create/edit/delete API client records with `name`, `url`, `api_key`, `contactPerson_id`, `contactMethod_id`
+- **Clients (API keys):** create/edit/delete/deactivate API client records with `name`, `url`, `api_key`, `contactPerson_id`, `contactMethod_id`, `active`; setting `active = false` revokes API access immediately without deleting the record
 - **Users view:** `UsersController` equivalent — list staff accounts, their department and role
 - Person search: look up people by name, email, or username for ticket reporter/assignee selection
 - Role assignment: set `people.role` to control staff-level access
