@@ -29,6 +29,18 @@ export class Open311Controller {
 
   // ---- F00.1: GET /open311/v2/services[.json|.xml] ----
 
+  /** Explicit .json suffix route — Open311 GeoReport v2 §3.1 */
+  @Get('services.json')
+  async getServicesJson(@Req() req: Request, @Res() res: Response): Promise<void> {
+    return this.getServices(req, res);
+  }
+
+  /** Explicit .xml suffix route — Open311 GeoReport v2 §3.2 */
+  @Get('services.xml')
+  async getServicesXml(@Req() req: Request, @Res() res: Response): Promise<void> {
+    return this.getServices(req, res);
+  }
+
   @Get('services')
   async getServices(@Req() req: Request, @Res() res: Response): Promise<void> {
     const role = getRole(req);

@@ -27,6 +27,7 @@ import { SearchModule } from './modules/search/search.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { GeoModule } from './modules/geo/geo.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { BookmarksModule } from './modules/bookmarks/bookmarks.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     // Wave 5: MediaModule
     // Wave 6: BookmarksModule
     ReportsModule,          // Wave 6 plan 17: F13 reporting & metrics (GET /metrics, GET /reports)
+    BookmarksModule,        // Wave 6: F12 bookmarked searches (GET/POST/DELETE /bookmarks)
   ],
   providers: [
     // Serialization

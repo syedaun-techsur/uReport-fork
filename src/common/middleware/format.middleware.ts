@@ -16,23 +16,39 @@ declare global {
 @Injectable()
 export class FormatMiddleware implements NestMiddleware {
   use(req: Request, _res: Response, next: NextFunction): void {
-    // Rewrite URL to strip format suffix BEFORE NestJS router sees the request.
-    // This enables /open311/v2/services.json and /open311/v2/services to both route
-    // to the same controller handler. (Rule 3 auto-fix — blocking for Open311 suffix routing)
-    FormatMiddleware.stripSuffix(req);
+    // Note: Do NOT call stripSuffix here.
+    // This middleware runs via NestJS forRoutes('*') which registers it at '/*' in Express.
+    // When Express matches the '/*' path, it strips the path prefix from req.url and restores
+    // it after the handler. Calling stripSuffix (which modifies req.url) from inside this
+    // handler corrupts the URL during restoration (double-URL bug).
+    //
+    // Instead, explicit .json/.xml suffix routes are registered on the controllers
+    // (e.g., @Get('services.json')), and format detection uses req.originalUrl which
+    // is never modified by Express path-stripping.
     req.negotiatedFormat = FormatMiddleware.resolve(req);
     next();
   }
 
-  /** Strip .json/.xml/.csv/.txt suffix from req.url and req.path in-place */
+  /** Strip .json/.xml/.csv/.txt suffix from req.url in-place.
+   *
+   * IMPORTANT: This method modifies req.url and is ONLY safe to call when req.url is the
+   * full request path (e.g., from a plain app.use(fn) without a path in main.ts).
+   * It must NOT be called from within a NestJS forRoutes('*') middleware because NestJS
+   * registers that middleware at '/*' which causes Express to strip the path from req.url
+   * and restore it after the handler. Modifying req.url inside such a handler corrupts
+   * the URL during restoration (resulting in doubled paths like '/path/foo.jsonpath/foo').
+   */
   static stripSuffix(req: Request): void {
     const suffixes = ['.json', '.xml', '.csv', '.txt'];
+    const checkUrl = (req.url) as string;
+    const pathPart = checkUrl.split('?')[0];
     for (const suffix of suffixes) {
-      if (req.url && req.url.split('?')[0].endsWith(suffix)) {
-        // Strip the suffix from the path portion, preserve query string
-        const [pathPart, ...queryParts] = req.url.split('?');
-        const stripped = pathPart.slice(0, -suffix.length);
+      if (pathPart.endsWith(suffix)) {
+        const [pathPartStr, ...queryParts] = checkUrl.split('?');
+        const stripped = pathPartStr.slice(0, -suffix.length);
         req.url = queryParts.length > 0 ? `${stripped}?${queryParts.join('?')}` : stripped;
+        // Clear the parseurl cache so the new req.url is used for routing
+        (req as any)._parsedUrl = undefined;
         break;
       }
     }

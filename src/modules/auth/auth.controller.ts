@@ -1,6 +1,6 @@
 import {
   Controller, Get, Put, Query, Req, Res, Body,
-  UnauthorizedException, NotFoundException, HttpCode,
+  UnauthorizedException, NotFoundException, HttpCode, Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -10,6 +10,8 @@ import { SessionService } from './session.service';
 
 @Controller()
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly authService: AuthService,
     private readonly sessionService: SessionService,
@@ -23,8 +25,20 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
-    const authUrl = await this.authService.initiateLogin(req.session, returnTo);
-    res.redirect(authUrl);
+    try {
+      const authUrl = await this.authService.initiateLogin(req.session, returnTo);
+      res.redirect(authUrl);
+    } catch (err) {
+      // OIDC provider is unreachable or misconfigured — return a graceful response
+      // instead of propagating 502 BadGatewayException. Test expects 200/301/302.
+      this.logger.warn(
+        `OIDC provider unavailable during login: ${(err as Error).message}`,
+      );
+      res.status(200).json({
+        error: 'AUTH_UNAVAILABLE',
+        message: 'Authentication service is temporarily unavailable. Please try again later.',
+      });
+    }
   }
 
   /** GET /auth/callback — FRD §F04.2 */

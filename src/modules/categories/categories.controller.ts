@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Put, Delete,
-  Param, Body, ParseIntPipe, ForbiddenException,
+  Param, Body, ParseIntPipe, ForbiddenException, UnauthorizedException,
   HttpCode, Req,
 } from '@nestjs/common';
 import type { Request } from 'express';
@@ -15,6 +15,11 @@ function getUserRole(req: Request): string | null | undefined {
   return (req as any).user?.role;
 }
 
+function requireAuthenticated(req: Request): void {
+  const user = (req as any).user;
+  if (!user) throw new UnauthorizedException({ error: 'UNAUTHORIZED', message: 'Authentication required' });
+}
+
 function requireStaff(req: Request): void {
   const role = getUserRole(req);
   if (role !== 'staff') throw new ForbiddenException({ error: 'FORBIDDEN', message: 'Staff access required' });
@@ -26,15 +31,17 @@ export class CategoriesController {
 
   // ---- Categories ----
 
-  /** GET /categories — list visible categories per caller's role (FRD §F10.1, §F02.5) */
+  /** GET /categories — list visible categories, requires authentication (US-2.3) */
   @Get('categories')
   findAll(@Req() req: Request) {
+    requireAuthenticated(req);
     return this.categoriesService.findAll(getUserRole(req));
   }
 
-  /** GET /categories/:id */
+  /** GET /categories/:id — requires authentication */
   @Get('categories/:id')
   findOne(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    requireAuthenticated(req);
     return this.categoriesService.findOne(id, getUserRole(req));
   }
 

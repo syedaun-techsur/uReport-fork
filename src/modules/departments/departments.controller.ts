@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Put, Delete,
-  Param, Body, ParseIntPipe, ForbiddenException, HttpCode, Req,
+  Param, Body, ParseIntPipe, ForbiddenException, UnauthorizedException, HttpCode, Req,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { DepartmentsService } from './departments.service';
@@ -21,6 +21,11 @@ class AssociateActionDto {
   action_id!: number;
 }
 
+function requireAuthenticated(req: Request): void {
+  const user = (req as any).user;
+  if (!user) throw new UnauthorizedException({ error: 'UNAUTHORIZED', message: 'Authentication required' });
+}
+
 function requireStaff(req: Request): void {
   const role = (req as any).user?.role;
   if (role !== 'staff') throw new ForbiddenException({ error: 'FORBIDDEN', message: 'Staff access required' });
@@ -33,12 +38,14 @@ export class DepartmentsController {
   // ---- Department CRUD ----
 
   @Get()
-  findAll() {
+  findAll(@Req() req: Request) {
+    requireAuthenticated(req);
     return this.departmentsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    requireAuthenticated(req);
     return this.departmentsService.findOne(id);
   }
 

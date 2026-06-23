@@ -117,6 +117,8 @@ export class SolrService implements OnModuleInit {
    * Index a single ticket. FIRE-AND-FORGET SAFE — catches all errors.
    * Callers MUST use: solrService.indexTicket(id).catch(err => logger.warn(...))
    * Solr failure MUST NOT propagate to the ticket write (FRD §F05.4).
+   *
+   * Note: solr-client v2+ uses Promise-based API (no callbacks).
    */
   async indexTicket(ticketId: number): Promise<void> {
     const ticket = await this.prisma.tickets.findUnique({
@@ -130,29 +132,16 @@ export class SolrService implements OnModuleInit {
     if (!ticket) return; // ticket may have been deleted; skip silently
 
     const doc = this.buildDocument(ticket);
-
-    await new Promise<void>((resolve, reject) => {
-      this.client.add(doc, (err: Error | null) => {
-        if (err) { reject(err); return; }
-        this.client.commit((commitErr: Error | null) => {
-          if (commitErr) { reject(commitErr); return; }
-          resolve();
-        });
-      });
-    });
+    // solr-client v2+ Promise-based API
+    await (this.client.add([doc]) as Promise<any>);
+    await (this.client.commit() as Promise<any>);
   }
 
   /** Delete a single ticket document from the Solr index */
   async deleteTicket(ticketId: number): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      this.client.deleteByID(ticketId, (err: Error | null) => {
-        if (err) { reject(err); return; }
-        this.client.commit((commitErr: Error | null) => {
-          if (commitErr) { reject(commitErr); return; }
-          resolve();
-        });
-      });
-    });
+    // solr-client v2+ Promise-based API
+    await (this.client.deleteByID(ticketId) as Promise<any>);
+    await (this.client.commit() as Promise<any>);
   }
 
   // ---- Search Query (FRD §F05.2, §F05.3) ----
@@ -160,9 +149,15 @@ export class SolrService implements OnModuleInit {
   /**
    * Execute an eDisMax query against Solr.
    * Throws ServiceUnavailableException on Solr unreachability (FRD §F05.2 HTTP 503).
+   *
+   * Note: solr-client v2+ uses a Promise-based API. The old callback style
+   * this.client.search(query, callback) does NOT work and causes unhandled rejections.
+   * We use this.client.query() to build the query and this.client.search(query) which
+   * returns a Promise.
    */
   async search(params: SolrSearchParams): Promise<SolrSearchResult> {
-    const query = this.client.createQuery();
+    // Use solr-client v2+ Query API: client.query() returns a Query object
+    const query = this.client.query();
 
     // eDisMax parser (FRD §F05.3)
     query.defType('edismax');
@@ -246,19 +241,19 @@ export class SolrService implements OnModuleInit {
     query.set('facet.mincount=1');
     query.set('facet.limit=50');
 
-    // Execute query
-    const response = await new Promise<any>((resolve, reject) => {
-      this.client.search(query, (err: Error | null, obj: any) => {
-        if (err) { reject(err); return; }
-        resolve(obj);
-      });
-    }).catch((err: Error) => {
-      this.logger.error('Solr search failed', err.stack);
+    // Execute query — solr-client v2+ returns a Promise directly
+    // All connection errors (ECONNREFUSED, timeout, etc.) are caught here and
+    // converted to ServiceUnavailableException (503) per FRD §F05.2.
+    let response: any;
+    try {
+      response = await (this.client.search(query) as Promise<any>);
+    } catch (err: unknown) {
+      this.logger.error('Solr search failed', (err as Error).stack);
       throw new ServiceUnavailableException({
         error: 'SEARCH_UNAVAILABLE',
         message: 'Search service unavailable',
       });
-    });
+    }
 
     const docs: SolrDocument[] = (response?.response?.docs ?? []) as SolrDocument[];
     const total: number = response?.response?.numFound ?? 0;
@@ -305,34 +300,20 @@ export class SolrService implements OnModuleInit {
 
   /** Delete all documents from the Solr index — used by re-index script (FRD §F05.5) */
   async deleteAll(): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      this.client.deleteByQuery('*:*', (err: Error | null) => {
-        if (err) { reject(err); return; }
-        this.client.commit((commitErr: Error | null) => {
-          if (commitErr) { reject(commitErr); return; }
-          resolve();
-        });
-      });
-    });
+    // solr-client v2+ Promise-based API
+    await (this.client.deleteByQuery('*:*') as Promise<any>);
+    await (this.client.commit() as Promise<any>);
   }
 
   /** Batch-add an array of Solr documents and commit */
   async addBatch(docs: SolrDocument[]): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      this.client.add(docs, (err: Error | null) => {
-        if (err) { reject(err); return; }
-        resolve();
-      });
-    });
+    // solr-client v2+ Promise-based API
+    await (this.client.add(docs) as Promise<any>);
   }
 
   /** Final commit — called once at end of re-index script (FRD §F05.5) */
   async commit(): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      this.client.commit((err: Error | null) => {
-        if (err) { reject(err); return; }
-        resolve();
-      });
-    });
+    // solr-client v2+ Promise-based API
+    await (this.client.commit() as Promise<any>);
   }
 }
