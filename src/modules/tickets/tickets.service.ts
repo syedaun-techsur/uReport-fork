@@ -4,10 +4,16 @@ import {
   ForbiddenException,
   BadRequestException,
   ConflictException,
+  Optional,
 } from '@nestjs/common';
 import { TicketsRepository } from './tickets.repository';
 import { CategoriesService } from '../categories/categories.service';
 import { PeopleService } from '../people/people.service';
+import { GeoClusterService } from '../geo/geo.service';
+import { SolrService } from '../search/solr.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import type { NotificationAction } from '../notifications/notifications.types';
+import { GelfLoggerService } from '../../common/logger/gelf-logger.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { AssignTicketDto } from './dto/assign-ticket.dto';
@@ -40,7 +46,54 @@ export class TicketsService {
     private readonly repo: TicketsRepository,
     private readonly categoriesService: CategoriesService,
     private readonly peopleService: PeopleService,
+    private readonly logger: GelfLoggerService,
+    @Optional() private readonly geoClusterService?: GeoClusterService,
+    @Optional() private readonly solrService?: SolrService,
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {}
+
+  /**
+   * Fire-and-forget geo cluster assignment (FRD §F09.4).
+   * Geo failure must NOT fail the ticket operation.
+   */
+  private fireAndForgetAssign(ticketId: number, lat: number | null | undefined, lon: number | null | undefined): void {
+    if (!this.geoClusterService || lat == null || lon == null) return;
+    this.geoClusterService.assignClusters(ticketId, lat, lon).catch((err: Error) => {
+      // Geo failure must NOT fail the ticket operation (FRD §F09.4)
+      console.error(`[GeoCluster] assignClusters failed for ticket ${ticketId}:`, err?.message);
+    });
+  }
+
+  /**
+   * Fire-and-forget geo data deletion when lat/lon cleared to null (FRD §F09.4).
+   */
+  private fireAndForgetDelete(ticketId: number): void {
+    if (!this.geoClusterService) return;
+    this.geoClusterService.deleteGeodata(ticketId).catch((err: Error) => {
+      console.error(`[GeoCluster] deleteGeodata failed for ticket ${ticketId}:`, err?.message);
+    });
+  }
+
+  /**
+   * Fire-and-forget Solr indexing helper.
+   * Solr failure MUST NOT propagate to the HTTP response (FRD §F05.4).
+   */
+  private indexTicketAsync(ticketId: number): void {
+    if (!this.solrService) return;
+    this.solrService.indexTicket(ticketId).catch((err: Error) => {
+      // GELF warn: Solr indexing failure must NOT propagate (FRD §F05.4)
+      this.logger.warn(`Solr indexing failed for ticket ${ticketId}: ${err.message}`);
+    });
+  }
+
+  /**
+   * Fire-and-forget notification send (FRD §F07.4).
+   * Notification failure must NOT fail the ticket operation.
+   */
+  private notify(actionName: NotificationAction, ticketId: number, actorId: number | null, historyId?: number): void {
+    if (!this.notificationsService) return;
+    void this.notificationsService.send(actionName, ticketId, actorId, historyId);
+  }
 
   async findAll(user: { id: number; role: string | null } | null) {
     return this.repo.findAll(roleDescriptor(user));
@@ -123,14 +176,22 @@ export class TicketsService {
 
     const openAction = await this.repo.findActionByName('open');
     if (openAction) {
-      await this.repo.appendHistory({
+      const openHistory = await this.repo.appendHistory({
         ticket: { connect: { id: ticket.id } },
         action: { connect: { id: openAction.id } },
         enteredByPerson: user ? { connect: { id: user.id } } : undefined,
         enteredDate: now,
         actionDate: now,
       } as any);
+      // F7: fire-and-forget notification (FRD §F07.4)
+      this.notify('open', ticket.id, user?.id ?? null, openHistory.id);
     }
+
+    // FRD §F09.4 — assign geo-clusters if lat/lon provided (fire-and-forget)
+    this.fireAndForgetAssign(ticket.id, dto.latitude, dto.longitude);
+
+    // FRD §F05.4: fire-and-forget Solr indexing; failure MUST NOT fail the ticket write
+    this.indexTicketAsync(ticket.id);
 
     return ticket;
   }
@@ -176,6 +237,18 @@ export class TicketsService {
       } as any);
     }
 
+    // FRD §F05.4: fire-and-forget Solr indexing
+    this.indexTicketAsync(ticket.id);
+
+    // Handle geo updates
+    const latChanged = dto.latitude !== undefined;
+    const lonChanged = dto.longitude !== undefined;
+    if ((latChanged || lonChanged) && dto.latitude != null && dto.longitude != null) {
+      this.fireAndForgetAssign(ticket.id, dto.latitude, dto.longitude);
+    } else if ((latChanged || lonChanged) && dto.latitude == null && dto.longitude == null) {
+      this.fireAndForgetDelete(ticket.id);
+    }
+
     return ticket;
   }
 
@@ -203,7 +276,7 @@ export class TicketsService {
 
     const action = await this.repo.findActionByName('assignment');
     if (action) {
-      await this.repo.appendHistory({
+      const assignHistory = await this.repo.appendHistory({
         ticket: { connect: { id } },
         action: { connect: { id: action.id } },
         enteredByPerson: { connect: { id: user.id } },
@@ -211,6 +284,8 @@ export class TicketsService {
         enteredDate: now,
         actionDate: now,
       } as any);
+      // F7: fire-and-forget notification (FRD §F07.4)
+      this.notify('assignment', id, user.id, assignHistory.id);
     }
 
     return updated;
@@ -243,7 +318,7 @@ export class TicketsService {
 
     const action = await this.repo.findActionByName('closed');
     if (action) {
-      await this.repo.appendHistory({
+      const closedHistory = await this.repo.appendHistory({
         ticket: { connect: { id } },
         action: { connect: { id: action.id } },
         enteredByPerson: { connect: { id: user.id } },
@@ -251,7 +326,12 @@ export class TicketsService {
         actionDate: now,
         notes: dto.notes ?? null,
       } as any);
+      // F7: fire-and-forget notification (FRD §F07.4)
+      this.notify('closed', id, user.id, closedHistory.id);
     }
+
+    // FRD §F05.4: fire-and-forget Solr indexing
+    this.indexTicketAsync(updated.id);
 
     return updated;
   }
@@ -301,7 +381,7 @@ export class TicketsService {
 
     const duplicateAction = await this.repo.findActionByName('duplicate');
     if (duplicateAction) {
-      await this.repo.appendHistory({
+      const dupHistory = await this.repo.appendHistory({
         ticket: { connect: { id: dto.parent_id } },
         action: { connect: { id: duplicateAction.id } },
         enteredByPerson: { connect: { id: user.id } },
@@ -309,6 +389,9 @@ export class TicketsService {
         actionDate: now,
         data: JSON.stringify({ duplicate: id }),
       } as any);
+      // F7: fire-and-forget notification for duplicate (FRD §F07.4)
+      // Notification goes to child ticket reporter (ticket id = child)
+      this.notify('duplicate', id, user.id, dupHistory.id);
     }
 
     return this.repo.findOne(id);
@@ -329,7 +412,7 @@ export class TicketsService {
     const action = await this.repo.findActionByName('comment');
     if (!action) throw new BadRequestException({ error: 'SERVER_ERROR', message: 'comment action not seeded' });
 
-    return this.repo.appendHistory({
+    const commentHistory = await this.repo.appendHistory({
       ticket: { connect: { id } },
       action: { connect: { id: action.id } },
       enteredByPerson: { connect: { id: user.id } },
@@ -337,6 +420,11 @@ export class TicketsService {
       actionDate: now,
       notes: dto.notes,
     } as any);
+
+    // F7: fire-and-forget notification (FRD §F07.4)
+    this.notify('comment', id, user.id, commentHistory.id);
+
+    return commentHistory;
   }
 
   async respond(id: number, dto: ResponseTicketDto, user: { id: number; role: string | null }) {
@@ -350,7 +438,7 @@ export class TicketsService {
     const action = await this.repo.findActionByName('response');
     if (!action) throw new BadRequestException({ error: 'SERVER_ERROR', message: 'response action not seeded' });
 
-    return this.repo.appendHistory({
+    const responseHistory = await this.repo.appendHistory({
       ticket: { connect: { id } },
       action: { connect: { id: action.id } },
       enteredByPerson: { connect: { id: user.id } },
@@ -359,6 +447,11 @@ export class TicketsService {
       actionDate: now,
       notes: dto.notes ?? null,
     } as any);
+
+    // F7: fire-and-forget notification (FRD §F07.4)
+    this.notify('response', id, user.id, responseHistory.id);
+
+    return responseHistory;
   }
 
   async reopen(id: number, dto: ReopenTicketDto, user: { id: number; role: string | null }) {
@@ -389,6 +482,9 @@ export class TicketsService {
         notes: dto.notes ?? 'Ticket re-opened',
       } as any);
     }
+
+    // FRD §F05.4: fire-and-forget Solr indexing (status change triggers re-index)
+    this.indexTicketAsync(updated.id);
 
     return updated;
   }
