@@ -6,9 +6,10 @@ import { CategoriesModule } from '../categories/categories.module';
 import { PeopleModule } from '../people/people.module';
 import { GeoModule } from '../geo/geo.module';
 import { SearchModule } from '../search/search.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [CategoriesModule, PeopleModule, GeoModule, SearchModule],   // SearchModule provides SolrService for optional injection
+  imports: [CategoriesModule, PeopleModule, GeoModule, SearchModule, NotificationsModule],   // NotificationsModule provides NotificationsService for TicketsService injection
   controllers: [TicketsController],
   providers: [TicketsService, TicketsRepository],
   exports: [TicketsService],   // exported for Open311Module (Wave 4b plan 10)

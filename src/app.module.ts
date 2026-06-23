@@ -22,6 +22,7 @@ import { TicketsModule } from './modules/tickets/tickets.module';
 import { MediaModule } from './modules/media/media.module';  // ← Wave 5c
 import { GeoModule } from './modules/geo/geo.module';
 import { SearchModule } from './modules/search/search.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { CaslGuard } from './common/guards/casl.guard';
 import { AuthGuard } from './common/guards/auth.guard';
 import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
@@ -40,8 +41,8 @@ import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
     MediaModule,   // ← Wave 5c
     GeoModule,     // ← Wave 5 plan 15
     SearchModule,  // ← Wave 5 plan 12 (F5: Full-Text Search via Apache Solr)
+    NotificationsModule,  // ← Wave 5 plan 13 (F7: Email Notifications)
     // Wave 4b: Open311Module (plan 10) added here
-    // Wave 5+: NotificationsModule
   ],
   providers: [
     // Serialization
