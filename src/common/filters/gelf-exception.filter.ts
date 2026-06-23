@@ -42,7 +42,10 @@ export class GelfExceptionFilter implements ExceptionFilter {
         ? exception.getResponse()
         : { statusCode: status, error: 'Internal Server Error', message };
 
-    response.status(status).json(body);
+    // Guard: only send response if headers have not already been sent
+    if (!response.headersSent) {
+      response.status(status).json(body);
+    }
 
     // Suppress unused variable warning - request is referenced here for future use
     void request;
