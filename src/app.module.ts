@@ -22,6 +22,7 @@ import { PeopleModule } from './modules/people/people.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { Open311Module } from './modules/open311/open311.module';
+import { TicketsModule } from './modules/tickets/tickets.module';
 
 @Module({
   imports: [
@@ -33,8 +34,8 @@ import { Open311Module } from './modules/open311/open311.module';
     PeopleModule,
     CategoriesModule,
     DepartmentsModule,
+    TicketsModule,     // Wave 4a: full ticket lifecycle (plan 09)
     Open311Module,     // Wave 4c: GeoReport v2 public API
-    // Wave 4a/b: TicketsModule — added when plans 09/10 execute
     // Wave 5: SearchModule, NotificationsModule, MediaModule, GeoModule
     // Wave 6: BookmarksModule, ReportsModule
   ],
