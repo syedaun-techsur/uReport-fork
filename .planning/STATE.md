@@ -3,7 +3,7 @@
 **Workflow Mode:** spec-express
 **Current Milestone:** v1
 **Status:** initialized
-**Last activity:** 2026-06-23 - Project initialized in spec-express mode, spec docs generated
+**Last activity:** 2026-06-23 - Completed express task: Full re-platform PHP/MySQL uReport → NestJS/PostgreSQL (F0–F15, 17 plans, 6 waves)
 
 ---
 
@@ -35,6 +35,12 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 
 | # | Description | Date | Commit | UAT | Directory |
 |---|-------------|------|--------|-----|-----------|
+
+## Express Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| modernize-legacy-php-ureport-open311-geo | Full re-platform PHP/MySQL uReport → NestJS/TypeScript/PostgreSQL — F0–F15 (16 features, 17 plans, 6 waves) | 2026-06-23 | 9ac4575 | [modernize-legacy-php-ureport-open311-geo](./express/modernize-legacy-php-ureport-open311-geo/) |
 
 ## Blockers/Concerns
 
