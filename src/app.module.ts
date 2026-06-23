@@ -21,6 +21,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { PeopleModule } from './modules/people/people.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
+import { Open311Module } from './modules/open311/open311.module';
 
 @Module({
   imports: [
@@ -32,7 +33,10 @@ import { DepartmentsModule } from './modules/departments/departments.module';
     PeopleModule,
     CategoriesModule,
     DepartmentsModule,
-    // Wave 4+ modules imported here as built
+    Open311Module,     // Wave 4c: GeoReport v2 public API
+    // Wave 4a/b: TicketsModule — added when plans 09/10 execute
+    // Wave 5: SearchModule, NotificationsModule, MediaModule, GeoModule
+    // Wave 6: BookmarksModule, ReportsModule
   ],
   providers: [
     // Serialization
