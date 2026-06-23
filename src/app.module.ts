@@ -26,7 +26,7 @@ import { TicketsModule } from './modules/tickets/tickets.module';
 import { SearchModule } from './modules/search/search.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { GeoModule } from './modules/geo/geo.module';
-import { BookmarksModule } from './modules/bookmarks/bookmarks.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -44,8 +44,8 @@ import { BookmarksModule } from './modules/bookmarks/bookmarks.module';
     SearchModule,           // Wave 5 plan 12: F5 Solr full-text search
     GeoModule,              // Wave 5 plan 15: F9 geo-clustering of ticket locations
     // Wave 5: MediaModule
-    BookmarksModule,        // Wave 6 plan 16: F12 bookmarked searches
-    // Wave 6: ReportsModule
+    // Wave 6: BookmarksModule
+    ReportsModule,          // Wave 6 plan 17: F13 reporting & metrics (GET /metrics, GET /reports)
   ],
   providers: [
     // Serialization
