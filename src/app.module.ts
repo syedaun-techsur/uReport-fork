@@ -23,7 +23,8 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { Open311Module } from './modules/open311/open311.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
-import { MediaModule } from './modules/media/media.module';  // ← Wave 5c
+import { SearchModule } from './modules/search/search.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -35,10 +36,11 @@ import { MediaModule } from './modules/media/media.module';  // ← Wave 5c
     PeopleModule,
     CategoriesModule,
     DepartmentsModule,
-    TicketsModule,     // Wave 4a: full ticket lifecycle (plan 09)
-    Open311Module,     // Wave 4c: GeoReport v2 public API
-    MediaModule,       // Wave 5c: F8 media & attachment management (plan 14)
-    // Wave 5: SearchModule, NotificationsModule, GeoModule
+    TicketsModule,          // Wave 4a: full ticket lifecycle (plan 09)
+    Open311Module,          // Wave 4c: GeoReport v2 public API
+    NotificationsModule,    // Wave 5 plan 13: F7 email notifications (Nodemailer, digest cron)
+    SearchModule,           // Wave 5 plan 12: F5 Solr full-text search
+    // Wave 5: MediaModule, GeoModule
     // Wave 6: BookmarksModule, ReportsModule
   ],
   providers: [

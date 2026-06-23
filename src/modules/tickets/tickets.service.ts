@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Optional,
   NotFoundException,
   ForbiddenException,
   BadRequestException,
@@ -10,6 +11,7 @@ import { CategoriesService } from '../categories/categories.service';
 import { PeopleService } from '../people/people.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import type { NotificationAction } from '../notifications/notifications.types';
+import { GeoClusterService } from '../geo/geo.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { AssignTicketDto } from './dto/assign-ticket.dto';
