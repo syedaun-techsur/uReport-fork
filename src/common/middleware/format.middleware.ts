@@ -16,20 +16,38 @@ declare global {
 @Injectable()
 export class FormatMiddleware implements NestMiddleware {
   use(req: Request, _res: Response, next: NextFunction): void {
+    // Rewrite URL to strip format suffix BEFORE NestJS router sees the request.
+    // This enables /open311/v2/services.json and /open311/v2/services to both route
+    // to the same controller handler. (Rule 3 auto-fix — blocking for Open311 suffix routing)
+    FormatMiddleware.stripSuffix(req);
     req.negotiatedFormat = FormatMiddleware.resolve(req);
     next();
   }
 
-  static resolve(req: Request): NegotiatedFormat {
-    const path = req.path ?? '';
+  /** Strip .json/.xml/.csv/.txt suffix from req.url and req.path in-place */
+  static stripSuffix(req: Request): void {
+    const suffixes = ['.json', '.xml', '.csv', '.txt'];
+    for (const suffix of suffixes) {
+      if (req.url && req.url.split('?')[0].endsWith(suffix)) {
+        // Strip the suffix from the path portion, preserve query string
+        const [pathPart, ...queryParts] = req.url.split('?');
+        const stripped = pathPart.slice(0, -suffix.length);
+        req.url = queryParts.length > 0 ? `${stripped}?${queryParts.join('?')}` : stripped;
+        break;
+      }
+    }
+  }
 
-    // 1. URL suffix — strip the suffix from path before routing (NestJS sees the clean path)
-    //    FormatMiddleware only READS the suffix; actual path rewriting is NOT done here.
-    //    The Open311 controller registers routes without the suffix; Express path includes it.
-    if (path.endsWith('.json')) return 'json';
-    if (path.endsWith('.xml'))  return 'xml';
-    if (path.endsWith('.csv'))  return 'csv';
-    if (path.endsWith('.txt'))  return 'txt';
+  static resolve(req: Request): NegotiatedFormat {
+    // NOTE: resolve() is called AFTER stripSuffix(), so req.path no longer contains the suffix.
+    // We check the original URL before stripping via req.originalUrl to determine format.
+    const originalPath = req.originalUrl?.split('?')[0] ?? req.path ?? '';
+
+    // 1. URL suffix from original URL (before stripping)
+    if (originalPath.endsWith('.json')) return 'json';
+    if (originalPath.endsWith('.xml'))  return 'xml';
+    if (originalPath.endsWith('.csv'))  return 'csv';
+    if (originalPath.endsWith('.txt'))  return 'txt';
 
     // 2. ?format= query parameter
     const fmt = (req.query as Record<string, string>)['format'];
@@ -46,6 +64,6 @@ export class FormatMiddleware implements NestMiddleware {
     if (accept.includes('text/html'))                                                       return 'html';
 
     // 4. Default: JSON for Open311 routes, HTML for everything else
-    return path.startsWith('/open311/v2') ? 'json' : 'html';
+    return originalPath.startsWith('/open311/v2') ? 'json' : 'html';
   }
 }
