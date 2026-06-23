@@ -23,6 +23,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { Open311Module } from './modules/open311/open311.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
+import { MediaModule } from './modules/media/media.module';  // ← Wave 5c
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { TicketsModule } from './modules/tickets/tickets.module';
     DepartmentsModule,
     TicketsModule,     // Wave 4a: full ticket lifecycle (plan 09)
     Open311Module,     // Wave 4c: GeoReport v2 public API
-    // Wave 5: SearchModule, NotificationsModule, MediaModule, GeoModule
+    MediaModule,       // Wave 5c: F8 media & attachment management (plan 14)
+    // Wave 5: SearchModule, NotificationsModule, GeoModule
     // Wave 6: BookmarksModule, ReportsModule
   ],
   providers: [
