@@ -101,9 +101,10 @@ model people {
   peopleEmails           peopleEmails[]
   peoplePhones           peoplePhones[]
   peopleAddresses        peopleAddresses[]
-  clients                clients[]
+  clients                clients[]       @relation("ClientContactPerson")
   categories             categories[]    @relation("CategoryDefaultPerson")
   ticketsEnteredBy       tickets[]       @relation("TicketEnteredBy")
+  ticketsReportedBy      tickets[]       @relation("TicketReportedBy")
   ticketsAssignedTo      tickets[]       @relation("TicketAssignedTo")
   ticketHistoryEnteredBy ticketHistory[] @relation("TicketHistoryEnteredBy")
   ticketHistoryActionOn  ticketHistory[] @relation("TicketHistoryActionPerson")
@@ -157,11 +158,13 @@ model clients {
   api_key          String  @unique @db.VarChar(50)
   contactPerson_id Int     @map("contactPerson_id")
   contactMethod_id Int?    @map("contactMethod_id")
+  active           Boolean @default(true)
 
-  contactPerson people          @relation(fields: [contactPerson_id], references: [id])
+  contactPerson people          @relation("ClientContactPerson", fields: [contactPerson_id], references: [id])
   contactMethod contactMethods? @relation(fields: [contactMethod_id], references: [id])
   tickets       tickets[]
 
+  @@index([api_key], map: "idx_clients_api_key")
   @@map("clients")
 }
 
@@ -260,8 +263,9 @@ model tickets {
   category      categories?    @relation(fields: [category_id], references: [id])
   issueType     issueTypes?    @relation(fields: [issueType_id], references: [id])
   client        clients?       @relation(fields: [client_id], references: [id])
-  enteredByPerson people?      @relation("TicketEnteredBy", fields: [enteredByPerson_id], references: [id])
-  assignedPerson  people?      @relation("TicketAssignedTo", fields: [assignedPerson_id], references: [id])
+  enteredByPerson  people?     @relation("TicketEnteredBy", fields: [enteredByPerson_id], references: [id])
+  reportedByPerson people?     @relation("TicketReportedBy", fields: [reportedByPerson_id], references: [id])
+  assignedPerson   people?     @relation("TicketAssignedTo", fields: [assignedPerson_id], references: [id])
   substatus     substatus?     @relation(fields: [substatus_id], references: [id])
   ticketHistory ticketHistory[]
   media         media[]
