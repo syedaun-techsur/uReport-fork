@@ -1,0 +1,356 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model version {
+  version String @id @db.VarChar(8)
+
+  @@map("version")
+}
+
+model contactMethods {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(128)
+
+  clients clients[]
+
+  @@map("contactMethods")
+}
+
+model substatus {
+  id          Int     @id @default(autoincrement())
+  name        String  @db.VarChar(25)
+  description String  @db.VarChar(128)
+  status      String  @default("open")
+  isDefault   Boolean @default(false) @map("isDefault")
+
+  tickets tickets[]
+
+  @@map("substatus")
+}
+
+model actions {
+  id          Int    @id @default(autoincrement())
+  name        String @db.VarChar(25)
+  description String @db.VarChar(128)
+  type        String @default("department")
+  template    String?
+  replyEmail  String? @map("replyEmail") @db.VarChar(128)
+
+  ticketHistory             ticketHistory[]
+  category_action_responses category_action_responses[]
+  department_actions        department_actions[]
+
+  @@map("actions")
+}
+
+model categoryGroups {
+  id       Int     @id @default(autoincrement())
+  name     String  @db.VarChar(50)
+  ordering Int?    @db.SmallInt
+
+  categories categories[]
+
+  @@map("categoryGroups")
+}
+
+model issueTypes {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(128)
+
+  tickets tickets[]
+
+  @@map("issueTypes")
+}
+
+model departments {
+  id               Int  @id @default(autoincrement())
+  name             String @db.VarChar(128)
+  defaultPerson_id Int?   @map("defaultPerson_id")
+
+  defaultPerson         people?               @relation("DepartmentDefaultPerson", fields: [defaultPerson_id], references: [id])
+  people                people[]              @relation("PersonDepartment")
+  categories            categories[]
+  department_actions    department_actions[]
+  department_categories department_categories[]
+
+  @@map("departments")
+}
+
+model people {
+  id            Int     @id @default(autoincrement())
+  firstname     String? @db.VarChar(128)
+  middlename    String? @db.VarChar(128)
+  lastname      String? @db.VarChar(128)
+  organization  String? @db.VarChar(128)
+  address       String? @db.VarChar(128)
+  city          String? @db.VarChar(128)
+  state         String? @db.VarChar(128)
+  zip           String? @db.VarChar(20)
+  department_id Int?
+  username      String? @unique @db.VarChar(40)
+  role          String? @db.VarChar(30)
+
+  department             departments?    @relation("PersonDepartment", fields: [department_id], references: [id])
+  defaultForDepartments  departments[]   @relation("DepartmentDefaultPerson")
+  peopleEmails           peopleEmails[]
+  peoplePhones           peoplePhones[]
+  peopleAddresses        peopleAddresses[]
+  clients                clients[]
+  categories             categories[]    @relation("CategoryDefaultPerson")
+  ticketsEnteredBy       tickets[]       @relation("TicketEnteredBy")
+  ticketsAssignedTo      tickets[]       @relation("TicketAssignedTo")
+  ticketHistoryEnteredBy ticketHistory[] @relation("TicketHistoryEnteredBy")
+  ticketHistoryActionOn  ticketHistory[] @relation("TicketHistoryActionPerson")
+  media                  media[]
+  bookmarks              bookmarks[]
+
+  @@map("people")
+}
+
+model peopleEmails {
+  id                   Int     @id @default(autoincrement())
+  person_id            Int
+  email                String  @db.VarChar(255)
+  label                String  @default("Other")
+  usedForNotifications Boolean @default(false) @map("usedForNotifications")
+
+  person people @relation(fields: [person_id], references: [id])
+
+  @@map("peopleEmails")
+}
+
+model peoplePhones {
+  id        Int     @id @default(autoincrement())
+  person_id Int
+  number    String? @db.VarChar(20)
+  label     String  @default("Other")
+
+  person people @relation(fields: [person_id], references: [id])
+
+  @@map("peoplePhones")
+}
+
+model peopleAddresses {
+  id        Int     @id @default(autoincrement())
+  person_id Int
+  address   String  @db.VarChar(128)
+  city      String? @db.VarChar(128)
+  state     String? @db.VarChar(128)
+  zip       String? @db.VarChar(20)
+  label     String  @default("Home")
+
+  person people @relation(fields: [person_id], references: [id])
+
+  @@map("peopleAddresses")
+}
+
+model clients {
+  id               Int     @id @default(autoincrement())
+  name             String  @db.VarChar(128)
+  url              String? @db.VarChar(255)
+  api_key          String  @unique @db.VarChar(50)
+  contactPerson_id Int     @map("contactPerson_id")
+  contactMethod_id Int?    @map("contactMethod_id")
+
+  contactPerson people          @relation(fields: [contactPerson_id], references: [id])
+  contactMethod contactMethods? @relation(fields: [contactMethod_id], references: [id])
+  tickets       tickets[]
+
+  @@map("clients")
+}
+
+model categories {
+  id                     Int      @id @default(autoincrement())
+  name                   String   @db.VarChar(50)
+  description            String?  @db.VarChar(512)
+  department_id          Int
+  defaultPerson_id       Int?     @map("defaultPerson_id")
+  categoryGroup_id       Int?     @map("categoryGroup_id")
+  active                 Boolean?
+  featured               Boolean?
+  displayPermissionLevel String   @default("staff") @map("displayPermissionLevel")
+  postingPermissionLevel String   @default("staff") @map("postingPermissionLevel")
+  customFields           String?  @map("customFields")
+  lastModified           DateTime @default(now()) @map("lastModified")
+  slaDays                Int?     @map("slaDays")
+  notificationReplyEmail String?  @map("notificationReplyEmail") @db.VarChar(128)
+  autoCloseIsActive      Boolean? @map("autoCloseIsActive")
+  autoCloseSubstatus_id  Int?     @map("autoCloseSubstatus_id")
+
+  department                departments             @relation(fields: [department_id], references: [id])
+  defaultPerson             people?                 @relation("CategoryDefaultPerson", fields: [defaultPerson_id], references: [id])
+  categoryGroup             categoryGroups?         @relation(fields: [categoryGroup_id], references: [id])
+  tickets                   tickets[]
+  category_action_responses category_action_responses[]
+  department_categories     department_categories[]
+
+  @@map("categories")
+}
+
+model category_action_responses {
+  id          Int     @id @default(autoincrement())
+  category_id Int
+  action_id   Int
+  template    String?
+  replyEmail  String? @map("replyEmail") @db.VarChar(128)
+
+  category categories @relation(fields: [category_id], references: [id])
+  action   actions    @relation(fields: [action_id], references: [id])
+
+  @@map("category_action_responses")
+}
+
+model department_actions {
+  department_id Int
+  action_id     Int
+
+  department departments @relation(fields: [department_id], references: [id])
+  action     actions     @relation(fields: [action_id], references: [id])
+
+  @@id([department_id, action_id])
+  @@map("department_actions")
+}
+
+model department_categories {
+  department_id Int
+  category_id   Int
+
+  department departments @relation(fields: [department_id], references: [id])
+  category   categories  @relation(fields: [category_id], references: [id])
+
+  @@id([department_id, category_id])
+  @@map("department_categories")
+}
+
+model tickets {
+  id                  Int      @id @default(autoincrement())
+  parent_id           Int?
+  category_id         Int?
+  issueType_id        Int?     @map("issueType_id")
+  client_id           Int?
+  enteredByPerson_id  Int?     @map("enteredByPerson_id")
+  reportedByPerson_id Int?     @map("reportedByPerson_id")
+  assignedPerson_id   Int?     @map("assignedPerson_id")
+  contactMethod_id    Int?     @map("contactMethod_id")
+  responseMethod_id   Int?     @map("responseMethod_id")
+  enteredDate         DateTime @default(now()) @map("enteredDate") @db.Timestamp()
+  lastModified        DateTime @default(now()) @map("lastModified")
+  addressId           Int?     @map("addressId")
+  latitude            Float?
+  longitude           Float?
+  location            String?  @db.VarChar(128)
+  city                String?  @db.VarChar(128)
+  state               String?  @db.VarChar(128)
+  zip                 String?  @db.VarChar(40)
+  status              String   @default("open") @db.VarChar(20)
+  closedDate          DateTime? @map("closedDate")
+  substatus_id        Int?
+  additionalFields    String?  @map("additionalFields") @db.VarChar(255)
+  customFields        String?  @map("customFields")
+  description         String?
+
+  parent         tickets?   @relation("TicketDuplicates", fields: [parent_id], references: [id])
+  children       tickets[]  @relation("TicketDuplicates")
+  category       categories?  @relation(fields: [category_id], references: [id])
+  issueType      issueTypes?  @relation(fields: [issueType_id], references: [id])
+  client         clients?     @relation(fields: [client_id], references: [id])
+  enteredByPerson  people?    @relation("TicketEnteredBy", fields: [enteredByPerson_id], references: [id])
+  assignedPerson   people?    @relation("TicketAssignedTo", fields: [assignedPerson_id], references: [id])
+  substatus        substatus? @relation(fields: [substatus_id], references: [id])
+  ticketHistory    ticketHistory[]
+  media            media[]
+  ticket_geodata   ticket_geodata?
+
+  @@map("tickets")
+}
+
+model ticketHistory {
+  id                 Int      @id @default(autoincrement())
+  ticket_id          Int
+  enteredByPerson_id Int?     @map("enteredByPerson_id")
+  actionPerson_id    Int?     @map("actionPerson_id")
+  action_id          Int
+  enteredDate        DateTime @default(now()) @map("enteredDate")
+  actionDate         DateTime @default(now()) @map("actionDate") @db.Timestamp()
+  notes              String?
+  data               String?
+  sentNotifications  String?  @map("sentNotifications")
+
+  ticket          tickets @relation(fields: [ticket_id], references: [id])
+  enteredByPerson people? @relation("TicketHistoryEnteredBy", fields: [enteredByPerson_id], references: [id])
+  actionPerson    people? @relation("TicketHistoryActionPerson", fields: [actionPerson_id], references: [id])
+  action          actions @relation(fields: [action_id], references: [id])
+
+  @@map("ticketHistory")
+}
+
+model media {
+  id               Int      @id @default(autoincrement())
+  ticket_id        Int
+  filename         String   @db.VarChar(128)
+  internalFilename String   @map("internalFilename") @db.VarChar(50)
+  mime_type        String?  @db.VarChar(128)
+  uploaded         DateTime @default(now())
+  person_id        Int?
+
+  ticket tickets @relation(fields: [ticket_id], references: [id])
+  person people? @relation(fields: [person_id], references: [id])
+
+  @@map("media")
+}
+
+model bookmarks {
+  id         Int     @id @default(autoincrement())
+  person_id  Int
+  type       String  @default("search") @db.VarChar(128)
+  name       String? @db.VarChar(128)
+  requestUri String  @map("requestUri") @db.VarChar(1024)
+
+  person people @relation(fields: [person_id], references: [id])
+
+  @@map("bookmarks")
+}
+
+model geoclusters {
+  id     Int                                 @id @default(autoincrement())
+  level  Int                                 @db.SmallInt
+  center Unsupported("geometry(Point, 4326)")
+
+  ticket_geodata_0 ticket_geodata[] @relation("GeoCluster0")
+  ticket_geodata_1 ticket_geodata[] @relation("GeoCluster1")
+  ticket_geodata_2 ticket_geodata[] @relation("GeoCluster2")
+  ticket_geodata_3 ticket_geodata[] @relation("GeoCluster3")
+  ticket_geodata_4 ticket_geodata[] @relation("GeoCluster4")
+  ticket_geodata_5 ticket_geodata[] @relation("GeoCluster5")
+  ticket_geodata_6 ticket_geodata[] @relation("GeoCluster6")
+
+  @@map("geoclusters")
+}
+
+model ticket_geodata {
+  ticket_id    Int  @id
+  cluster_id_0 Int?
+  cluster_id_1 Int?
+  cluster_id_2 Int?
+  cluster_id_3 Int?
+  cluster_id_4 Int?
+  cluster_id_5 Int?
+  cluster_id_6 Int?
+
+  ticket    tickets      @relation(fields: [ticket_id], references: [id])
+  cluster_0 geoclusters? @relation("GeoCluster0", fields: [cluster_id_0], references: [id])
+  cluster_1 geoclusters? @relation("GeoCluster1", fields: [cluster_id_1], references: [id])
+  cluster_2 geoclusters? @relation("GeoCluster2", fields: [cluster_id_2], references: [id])
+  cluster_3 geoclusters? @relation("GeoCluster3", fields: [cluster_id_3], references: [id])
+  cluster_4 geoclusters? @relation("GeoCluster4", fields: [cluster_id_4], references: [id])
+  cluster_5 geoclusters? @relation("GeoCluster5", fields: [cluster_id_5], references: [id])
+  cluster_6 geoclusters? @relation("GeoCluster6", fields: [cluster_id_6], references: [id])
+
+  @@map("ticket_geodata")
+}
