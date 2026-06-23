@@ -8,6 +8,54 @@ import { GelfLoggerService } from './common/logger/gelf-logger.service';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const RedisStore = require('connect-redis').default;
 
+/**
+ * Attempt to connect to Redis and return a RedisStore if successful.
+ * Falls back to undefined (MemoryStore) if Redis is unavailable.
+ */
+async function createSessionStore(): Promise<session.Store | undefined> {
+  return new Promise((resolve) => {
+    const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
+    const redisClient = new Redis(redisUrl, {
+      // Do not retry — fail fast so the fallback kicks in immediately
+      maxRetriesPerRequest: 0,
+      retryStrategy: () => null,
+      enableOfflineQueue: false,
+      lazyConnect: true,
+    });
+
+    const cleanup = (store?: session.Store) => {
+      redisClient.removeAllListeners();
+      resolve(store);
+    };
+
+    redisClient.once('ready', () => {
+      console.log('[session] Redis connected — using RedisStore');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      cleanup(new RedisStore({ client: redisClient }) as session.Store);
+    });
+
+    redisClient.once('error', (err: Error) => {
+      console.warn(
+        `[session] Redis unavailable (${err.message}) — falling back to MemoryStore`,
+      );
+      void redisClient.disconnect();
+      cleanup(undefined);
+    });
+
+    // Initiate the connection (lazyConnect means it doesn't auto-connect)
+    redisClient.connect().catch(() => {
+      // error event fires separately; ignore the promise rejection here
+    });
+
+    // Safety timeout: if neither event fires within 3 s, fall back
+    setTimeout(() => {
+      console.warn('[session] Redis connection timed out — falling back to MemoryStore');
+      void redisClient.disconnect();
+      cleanup(undefined);
+    }, 3000);
+  });
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
@@ -23,14 +71,13 @@ async function bootstrap() {
     }),
   );
 
-  // Redis-backed session store (TechArch §5.2, §6.3)
-  const redisClient = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379');
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const redisStore = new RedisStore({ client: redisClient }) as session.Store;
+  // Redis-backed session store with MemoryStore fallback (TechArch §5.2, §6.3)
+  const sessionStore = await createSessionStore();
 
   app.use(
     session({
-      store: redisStore,
+      // sessionStore is undefined when Redis is unavailable → express-session uses built-in MemoryStore
+      ...(sessionStore ? { store: sessionStore } : {}),
       secret: process.env.SESSION_SECRET ?? 'dev-secret-change-in-prod',
       resave: false,
       saveUninitialized: false,
