@@ -24,6 +24,7 @@ import { GeoModule } from './modules/geo/geo.module';
 import { SearchModule } from './modules/search/search.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { BookmarksModule } from './modules/bookmarks/bookmarks.module';
+import { ReportsModule } from './modules/reports/reports.module';  // ← Wave 6 plan 17 (F13)
 import { CaslGuard } from './common/guards/casl.guard';
 import { AuthGuard } from './common/guards/auth.guard';
 import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
@@ -44,6 +45,7 @@ import { PiiMaskInterceptor } from './common/interceptors/pii-mask.interceptor';
     SearchModule,  // ← Wave 5 plan 12 (F5: Full-Text Search via Apache Solr)
     NotificationsModule,  // ← Wave 5 plan 13 (F7: Email Notifications)
     BookmarksModule,      // ← Wave 6 plan 16 (F12: Bookmarked Searches)
+    ReportsModule,        // ← Wave 6 plan 17 (F13: Reporting & Metrics)
     // Wave 4b: Open311Module (plan 10) added here
   ],
   providers: [
