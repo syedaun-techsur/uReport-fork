@@ -1,7 +1,7 @@
 {
   "name": "ureport",
   "version": "1.0.0",
-  "description": "uReport — Open311 GeoReport v2 constituent-request CRM (Node.js re-platform)",
+  "description": "uReport \u2014 Open311 GeoReport v2 constituent-request CRM (Node.js re-platform)",
   "private": true,
   "scripts": {
     "build": "nest build",

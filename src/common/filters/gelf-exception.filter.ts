@@ -45,6 +45,13 @@ export class GelfExceptionFilter implements ExceptionFilter {
     // Suppress unused variable warning — request is part of the interface
     void request;
 
+    // Guard against "Cannot set headers after they are sent" — can happen when
+    // the serialization interceptor or another filter has already flushed the
+    // response (e.g. during Redis reconnect storm or streaming scenarios).
+    if (response.headersSent) {
+      return;
+    }
+
     response.status(status).json(body);
   }
 }

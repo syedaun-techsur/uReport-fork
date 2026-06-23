@@ -25,7 +25,18 @@ async function bootstrap() {
   );
 
   // Redis-backed session store (TechArch §5.2, §6.3)
-  const redisClient = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379');
+  const redisClient = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', {
+    // Suppress unhandled-error events during reconnect storms; NestJS logs these via GELF.
+    // Without this listener ioredis emits to process 'error' which crashes Node in some versions.
+    lazyConnect: false,
+    maxRetriesPerRequest: null,
+    enableOfflineQueue: true,
+  });
+  // Attach an error listener so ioredis reconnect errors don't become unhandled exceptions.
+  redisClient.on('error', (err: Error) => {
+    // Non-fatal: ioredis will reconnect automatically; sessions degrade gracefully.
+    console.warn('[redis] connection error (non-fatal):', err.message);
+  });
   const redisStore = new RedisStore({ client: redisClient });
 
   app.use(
