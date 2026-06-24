@@ -1,6 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { AppController } from './app.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { GelfLoggerModule } from './common/logger/gelf-logger.module';
 import { GelfRequestMiddleware } from './common/middleware/gelf-request.middleware';
@@ -49,6 +50,7 @@ import { BookmarksModule } from './modules/bookmarks/bookmarks.module';
     ReportsModule,          // Wave 6 plan 17: F13 reporting & metrics (GET /metrics, GET /reports)
     BookmarksModule,        // Wave 6: F12 bookmarked searches (GET/POST/DELETE /bookmarks)
   ],
+  controllers: [AppController],
   providers: [
     // Serialization
     JsonSerializer,
